@@ -1,32 +1,30 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Newtonsoft.Json.Linq;
 using Xunit;
-namespace Tests
+
+namespace Tests;
+
+public class StringListControllerV3Tests : IClassFixture<WebApplicationFactory<Program>>
 {
-    public class StringListControllerV3Tests : IClassFixture<WebApplicationFactory<Program>>
+    private readonly HttpClient _httpClient;
+
+    public StringListControllerV3Tests(WebApplicationFactory<Program> factory)
     {
-        private HttpClient _httpClient;
-        private WebApplicationFactory<Program> _factory;
+        const string serviceUrl = "https://localhost:7114/";
+        _httpClient = factory.CreateClient();
+        _httpClient.BaseAddress = new Uri(serviceUrl);
+    }
 
-        public StringListControllerV3Tests(WebApplicationFactory<Program> factory)
-        {
-            _factory = factory;
-            var serviceUrl = "https://localhost:7114/";
-            _httpClient = _factory.CreateClient();
-            _httpClient.BaseAddress = new Uri(serviceUrl);
-        }
-
-        [Fact]
-        public async Task GivenURLChange_WhenCalledV3_ThenReturnStringStartingWithC()
-        {
-            var json = await _httpClient.GetStringAsync("/api/v3/StringList");
-            var strings = JArray.Parse(json);
-            Assert.Equal(2, strings.Count);
-            Assert.StartsWith("C", (string)strings[0]);
-            Assert.StartsWith("C", (string)strings[1]);
-        }
+    [Fact]
+    public async Task GivenURLChange_WhenCalledV3_ThenReturnStringStartingWithC()
+    {
+        string json = await _httpClient.GetStringAsync("/api/v3/StringList");
+        JArray? strings = JArray.Parse(json);
+        Assert.Equal(2, strings.Count);
+        Assert.StartsWith("C", (string)strings[0]);
+        Assert.StartsWith("C", (string)strings[1]);
     }
 }
